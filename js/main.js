@@ -1,20 +1,41 @@
+/************************************************************
+ * PROGRAMA: Animación de círculos en Canvas (1 a 10 al recargar)
+ * LENGUAJE: JavaScript
+ * API: Canvas 2D
+ *
+ * DESCRIPCIÓN:
+ * - El canvas ocupa toda la ventana.
+ * - Cada vez que se recarga la página se generan ALEATORIAMENTE
+ *   entre 1 y 10 círculos.
+ * - Cada círculo tiene radio, color, velocidad y dirección inicial
+ *   aleatoria (opción PRO: cualquier ángulo).
+ * - Los círculos rebotan en los bordes del canvas.
+ ************************************************************/
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-// Ajusta el canvas al tamaño de la ventana
+/* ==========================================================
+   1) CANVAS A PANTALLA COMPLETA
+   ========================================================== */
 function resizeCanvas() {
-  canvas.width = window.innerWidth/2;
-  canvas.height = window.innerHeight/2;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
   canvas.style.background = "#ff8";
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-// Número aleatorio entre min y max
+/* ==========================================================
+   2) UTILIDADES
+   ========================================================== */
 function randomBetween(min, max) {
   return Math.random() * (max - min) + min;
 }
 
+/* ==========================================================
+   3) CLASE CIRCLE
+   ========================================================== */
 class Circle {
   constructor(x, y, radius, color, text, speed) {
     this.posX = x;
@@ -33,11 +54,11 @@ class Circle {
   draw(context) {
     context.beginPath();
 
-    // Texto al centro
+    // Texto centrado
     context.fillStyle = this.color;
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.font = "20px Arial";
+    context.font = "16px Arial";
     context.fillText(this.text, this.posX, this.posY);
 
     // Círculo
@@ -63,30 +84,54 @@ class Circle {
     if (this.posY + this.radius > h) this.dy = -Math.abs(this.dy);
     if (this.posY - this.radius < 0) this.dy = Math.abs(this.dy);
 
+    // Avanza posición
     this.posX += this.dx;
     this.posY += this.dy;
   }
 }
 
-// Radio aleatorio (30 a 129)
-const randomRadius = Math.floor(Math.random() * 100 + 30);
+/* ==========================================================
+   4) CREAR ENTRE 1 Y 10 CÍRCULOS ALEATORIOS (AL INICIAR)
+   ========================================================== */
+const circles = [];
 
-// Posición inicial segura (no se sale)
-const margin = randomRadius + 2;
-const startX = randomBetween(margin, canvas.width - margin);
-const startY = randomBetween(margin, canvas.height - margin);
+// Cantidad aleatoria entre 1 y 10 cada vez que recargas
+const amount = Math.floor(Math.random() * 10) + 1;
 
-// Crear círculos con distintas velocidades
-const miCirculo = new Circle(startX, startY, randomRadius, "blue", "Tec1", 5);
-const miCirculo2 = new Circle(startX + 80, startY + 80, randomRadius, "red", "Tec2", 2);
+for (let i = 0; i < amount; i++) {
+  // Radio aleatorio (20 a 49)
+  const radius = Math.floor(Math.random() * 30 + 20);
 
-// Animación
-function updateCircle() {
-  requestAnimationFrame(updateCircle);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  miCirculo.update(ctx);
-  miCirculo2.update(ctx);
+  // Margen para que NO se dibuje fuera del canvas
+  const margin = radius + 2;
+
+  // Posición inicial segura (no se sale)
+  const x = randomBetween(margin, canvas.width - margin);
+  const y = randomBetween(margin, canvas.height - margin);
+
+  // Velocidad aleatoria (1 a 5)
+  const speed = randomBetween(1, 5);
+
+  // Color aleatorio con HSL (bonito y variado)
+  const color = `hsl(${Math.random() * 360}, 80%, 45%)`;
+
+  // Texto (número del círculo)
+  const text = i + 1;
+
+  circles.push(new Circle(x, y, radius, color, text, speed));
 }
 
-updateCircle();
+/* ==========================================================
+   5) ANIMACIÓN
+   ========================================================== */
+function animate() {
+  requestAnimationFrame(animate);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Actualiza todos los círculos
+  for (let i = 0; i < circles.length; i++) {
+    circles[i].update(ctx);
+  }
+}
+
+animate();
