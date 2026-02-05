@@ -10,7 +10,7 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-// Número aleatorio entre min y max (incluye min, excluye max)
+// Número aleatorio entre min y max
 function randomBetween(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -24,8 +24,10 @@ class Circle {
     this.text = text;
     this.speed = speed;
 
-    this.dx = 1 * this.speed;
-    this.dy = 1 * this.speed;
+    // 🔥 Opción PRO: dirección inicial en cualquier ángulo
+    const angle = Math.random() * Math.PI * 2;
+    this.dx = Math.cos(angle) * this.speed;
+    this.dy = Math.sin(angle) * this.speed;
   }
 
   draw(context) {
@@ -69,14 +71,14 @@ class Circle {
 // Radio aleatorio (30 a 129)
 const randomRadius = Math.floor(Math.random() * 100 + 30);
 
-// Generar posición inicial segura (no se sale)
-const margin = randomRadius + 2; // +2 por lineWidth aprox
-const randomX = randomBetween(margin, canvas.width - margin);
-const randomY = randomBetween(margin, canvas.height - margin);
+// Posición inicial segura (no se sale)
+const margin = randomRadius + 2;
+const startX = randomBetween(margin, canvas.width - margin);
+const startY = randomBetween(margin, canvas.height - margin);
 
-// Crear círculos
-const miCirculo = new Circle(randomX, randomY, randomRadius, "blue", "Tec1", 5);
-const miCirculo2 = new Circle(randomX + 60, randomY + 60, randomRadius, "red", "Tec2", 2);
+// Crear círculos con distintas velocidades
+const miCirculo = new Circle(startX, startY, randomRadius, "blue", "Tec1", 5);
+const miCirculo2 = new Circle(startX + 80, startY + 80, randomRadius, "red", "Tec2", 2);
 
 // Animación
 function updateCircle() {
@@ -87,3 +89,4 @@ function updateCircle() {
 }
 
 updateCircle();
+
