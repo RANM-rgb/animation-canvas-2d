@@ -3,8 +3,8 @@ const ctx = canvas.getContext("2d");
 
 // Ajusta el canvas al tamaño de la ventana
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth/2;
+  canvas.height = window.innerHeight/2;
   canvas.style.background = "#ff8";
 }
 resizeCanvas();
