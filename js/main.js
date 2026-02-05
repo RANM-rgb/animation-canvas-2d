@@ -6,10 +6,14 @@ const circlesSlider = document.getElementById("circlesSlider");
 const widthSlider = document.getElementById("widthSlider");
 const heightSlider = document.getElementById("heightSlider");
 
-// Textos de valores
+// Valores UI
 const circlesValue = document.getElementById("circlesValue");
 const widthValue = document.getElementById("widthValue");
 const heightValue = document.getElementById("heightValue");
+const canvasInfo = document.getElementById("canvasInfo");
+
+// Botón
+const randomBtn = document.getElementById("randomBtn");
 
 // Utilidad random
 function randomBetween(min, max) {
@@ -32,22 +36,20 @@ class Circle {
   }
 
   draw(context) {
+    // Círculo
     context.beginPath();
+    context.lineWidth = 2;
+    context.strokeStyle = this.color;
+    context.arc(this.posX, this.posY, this.radius, 0, Math.PI * 2);
+    context.stroke();
+    context.closePath();
 
-    // Texto centrado
+    // Texto
     context.fillStyle = this.color;
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.font = "16px Arial";
     context.fillText(this.text, this.posX, this.posY);
-
-    // Círculo
-    context.lineWidth = 2;
-    context.strokeStyle = this.color;
-    context.arc(this.posX, this.posY, this.radius, 0, Math.PI * 2);
-    context.stroke();
-
-    context.closePath();
   }
 
   update(context) {
@@ -72,24 +74,27 @@ class Circle {
 // Arreglo de círculos
 let circles = [];
 
-/**
- * Ajusta tamaño del canvas según sliders
- */
+// Ajusta tamaño del canvas según sliders
 function applyCanvasSize() {
   canvas.width = Number(widthSlider.value);
   canvas.height = Number(heightSlider.value);
 
   widthValue.textContent = canvas.width;
   heightValue.textContent = canvas.height;
+  canvasInfo.textContent = `${canvas.width} × ${canvas.height}`;
 }
 
-/**
- * Genera EXACTAMENTE N círculos (reemplaza los actuales)
- */
-function generateCircles(n) {
-  circles = [];
+// Agrega o recorta círculos sin reiniciar todos (más natural)
+function addCirclesUntil(n) {
+  const current = circles.length;
 
-  for (let i = 0; i < n; i++) {
+  if (n <= current) {
+    circles = circles.slice(0, n);
+    circlesValue.textContent = n;
+    return;
+  }
+
+  for (let i = current; i < n; i++) {
     const radius = Math.floor(Math.random() * 30 + 15); // 15 a 44
     const margin = radius + 2;
 
@@ -106,43 +111,17 @@ function generateCircles(n) {
   circlesValue.textContent = n;
 }
 
-/**
- * (Opcional) Genera MÁS círculos sin borrar los existentes.
- * Útil si quieres que al mover hacia arriba "se agreguen" y no regenere todo.
- */
-function addCirclesUntil(n) {
-  const current = circles.length;
-  if (n <= current) {
-    // si bajas el slider, recortamos
-    circles = circles.slice(0, n);
-    circlesValue.textContent = n;
-    return;
-  }
-
-  for (let i = current; i < n; i++) {
-    const radius = Math.floor(Math.random() * 30 + 15);
-    const margin = radius + 2;
-
-    const x = randomBetween(margin, canvas.width - margin);
-    const y = randomBetween(margin, canvas.height - margin);
-
-    const speed = randomBetween(1, 5);
-    const color = `hsl(${Math.random() * 360}, 80%, 45%)`;
-    const text = i + 1;
-
-    circles.push(new Circle(x, y, radius, color, text, speed));
-  }
-
-  circlesValue.textContent = n;
+// Regenera escena completa
+function regenerateScene() {
+  circles = [];
+  addCirclesUntil(Number(circlesSlider.value));
 }
 
-// ====== Inicialización ======
+// ===== Inicialización =====
 applyCanvasSize();
-generateCircles(Number(circlesSlider.value));
+regenerateScene();
 
-// ====== Eventos de sliders ======
-
-// Al mover ancho/alto: cambia tamaño y reajusta círculos para no "quedarse fuera"
+// ===== Eventos =====
 widthSlider.addEventListener("input", () => {
   applyCanvasSize();
 });
@@ -151,13 +130,27 @@ heightSlider.addEventListener("input", () => {
   applyCanvasSize();
 });
 
-// Al mover cantidad: opción 1 (regenere todo):
-// circlesSlider.addEventListener("input", () => generateCircles(Number(circlesSlider.value)));
+circlesSlider.addEventListener("input", () => {
+  addCirclesUntil(Number(circlesSlider.value));
+});
 
-// Al mover cantidad: opción 2 (más natural): agrega/recorta sin resetear todo
-circlesSlider.addEventListener("input", () => addCirclesUntil(Number(circlesSlider.value)));
+// Botón aleatorio: cambia valores y regenera
+randomBtn.addEventListener("click", () => {
+  const randomCount = Math.floor(randomBetween(1, 50));
+  const randomW = Math.floor(randomBetween(400, 1100));
+  const randomH = Math.floor(randomBetween(250, 750));
 
-// ====== Animación ======
+  circlesSlider.value = randomCount;
+  widthSlider.value = randomW;
+  heightSlider.value = randomH;
+
+  applyCanvasSize();
+  circlesValue.textContent = randomCount;
+
+  regenerateScene();
+});
+
+// ===== Animación =====
 function animate() {
   requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -168,3 +161,5 @@ function animate() {
 }
 
 animate();
+
+

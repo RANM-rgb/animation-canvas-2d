@@ -3,67 +3,201 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Canvas con Desplazadores</title>
+  <link rel="icon" type="image/png" href="./img/favicon.png">
+
+  <title>Canvas 2D - Sliders</title>
+
+  <!-- Bootstrap 5 (CDN) -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
 
   <style>
-    html, body { margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f6f6f6; }
-
-    .panel {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 12px 14px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-      z-index: 10;
-      width: 300px;
+    body {
+      background: linear-gradient(135deg, #f5f7ff, #f7fff5);
+      min-height: 100vh;
     }
 
-    .row { margin-bottom: 10px; }
-    label { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
-    input[type="range"] { width: 100%; }
-
-    canvas {
+    /* Canvas centrado y con look "app" */
+    #canvas {
+      background: #fffb9a;
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 18px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
       display: block;
-      margin: 0 auto;
-      background: #ff8;
-      border: 1px solid #ccc;
-      margin-top: 90px; /* deja espacio para el panel */
+      width: 100%;
+      height: auto;
+    }
+
+    /* Panel sticky en desktop */
+    @media (min-width: 992px) {
+      .sticky-tools {
+        position: sticky;
+        top: 16px;
+      }
+    }
+
+    .range-label {
+      font-size: .9rem;
+      color: #4b5563;
+    }
+
+    .badge-soft {
+      background: rgba(13,110,253,.12);
+      color: #0d6efd;
+      border: 1px solid rgba(13,110,253,.25);
+      font-weight: 600;
+    }
+
+    .card-soft {
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 18px;
+      box-shadow: 0 10px 26px rgba(0,0,0,.06);
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      background: #0d6efd;
+      box-shadow: 0 0 0 4px rgba(13,110,253,.12);
+      margin-right: 10px;
+      transform: translateY(1px);
     }
   </style>
 </head>
 
 <body>
-  <!-- Panel de controles -->
-  <div class="panel">
-    <div class="row">
-      <label>
-        Círculos: <span id="circlesValue">5</span>
-      </label>
-      <input id="circlesSlider" type="range" min="1" max="50" value="5" />
+  <div class="container py-4 py-lg-5">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-4">
+      <div>
+        <h1 class="h3 mb-1">
+          <span class="brand-dot"></span>
+          Canvas 2D con Controles
+        </h1>
+        <div class="text-secondary">
+          Genera círculos y ajusta el tamaño del canvas en tiempo real.
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <span class="badge badge-soft rounded-pill px-3 py-2">POO</span>
+        <span class="badge badge-soft rounded-pill px-3 py-2">Canvas 2D</span>
+        <span class="badge badge-soft rounded-pill px-3 py-2">Bootstrap</span>
+      </div>
     </div>
 
-    <div class="row">
-      <label>
-        Ancho canvas: <span id="widthValue">900</span> px
-      </label>
-      <input id="widthSlider" type="range" min="300" max="1200" value="900" />
-    </div>
+    <div class="row g-4">
+      <!-- Panel de herramientas -->
+      <div class="col-12 col-lg-4">
+        <div class="sticky-tools">
+          <div class="card card-soft">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                  <h2 class="h5 mb-0">Controles</h2>
+                  <small class="text-secondary">Mueve los sliders para cambiar la escena</small>
+                </div>
+                <button id="randomBtn" class="btn btn-primary btn-sm rounded-pill px-3">
+                  Aleatorio
+                </button>
+              </div>
 
-    <div class="row">
-      <label>
-        Alto canvas: <span id="heightValue">450</span> px
-      </label>
-      <input id="heightSlider" type="range" min="200" max="800" value="450" />
+              <hr class="my-3">
+
+              <!-- Círculos -->
+              <div class="mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="range-label">Cantidad de círculos</div>
+                  <span class="badge badge-soft rounded-pill" id="circlesValue">5</span>
+                </div>
+                <input
+                  id="circlesSlider"
+                  type="range"
+                  class="form-range"
+                  min="1"
+                  max="50"
+                  value="5"
+                />
+                <div class="d-flex justify-content-between text-secondary small">
+                  <span>1</span><span>50</span>
+                </div>
+              </div>
+
+              <!-- Ancho -->
+              <div class="mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="range-label">Ancho del canvas (px)</div>
+                  <span class="badge badge-soft rounded-pill" id="widthValue">900</span>
+                </div>
+                <input
+                  id="widthSlider"
+                  type="range"
+                  class="form-range"
+                  min="300"
+                  max="1200"
+                  value="900"
+                />
+                <div class="d-flex justify-content-between text-secondary small">
+                  <span>300</span><span>1200</span>
+                </div>
+              </div>
+
+              <!-- Alto -->
+              <div class="mb-2">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="range-label">Alto del canvas (px)</div>
+                  <span class="badge badge-soft rounded-pill" id="heightValue">450</span>
+                </div>
+                <input
+                  id="heightSlider"
+                  type="range"
+                  class="form-range"
+                  min="200"
+                  max="800"
+                  value="450"
+                />
+                <div class="d-flex justify-content-between text-secondary small">
+                  <span>200</span><span>800</span>
+                </div>
+              </div>
+
+              <hr class="my-3">
+
+              <div class="small text-secondary">
+                Tip: Usa <b>Aleatorio</b> para generar una escena nueva.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="col-12 col-lg-8">
+        <div class="card card-soft">
+          <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <div>
+                <div class="fw-semibold">Escena</div>
+                <div class="text-secondary small">Rebote en bordes y movimiento con dirección aleatoria</div>
+              </div>
+              <div class="text-secondary small">
+                Canvas: <span id="canvasInfo" class="fw-semibold">900 × 450</span>
+              </div>
+            </div>
+
+            <canvas id="canvas"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Canvas -->
-  <canvas id="canvas"></canvas>
-
+  <!-- Bootstrap JS (opcional, no es necesario para sliders pero útil) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="./js/main.js"></script>
 </body>
 </html>
